@@ -66,10 +66,10 @@ blockchain = Blockchain()
 # Streamlit Frontend
 # -------------------------
 def main():
-    st.title("🏥 Healthcare Blockchain System")
+    st.title("🩺 Healthcare Blockchain System")
     st.markdown("This blockchain securely stores **patient medical records** on-chain.")
 
-    st.subheader("🧾 Add a New Patient Record")
+    st.subheader(" ➕ Add a New Patient Record")
     patient_id = st.text_input("Patient ID")
     name = st.text_input("Patient Name")
     age = st.number_input("Age", min_value=0, max_value=120, step=1)
@@ -97,3 +97,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
