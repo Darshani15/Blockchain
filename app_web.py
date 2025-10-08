@@ -12,6 +12,7 @@ class Blockchain:
     def __init__(self):
         self.chain = []
         self.current_records = []
+        # create the genesis block
         self.create_block(proof=100, previous_hash='1')
 
     def create_block(self, proof, previous_hash):
@@ -66,7 +67,7 @@ def add_record():
     data = request.json
     required_fields = ["patient_id", "name", "age", "disease", "treatment"]
     if not all(field in data for field in required_fields):
-        return {"error": "Missing fields"}, 400
+        return jsonify({"error": "Missing fields"}), 400
 
     blockchain.add_record(
         data["patient_id"],
@@ -82,7 +83,7 @@ def add_record():
     previous_hash = hashlib.sha256(json.dumps(blockchain.last_block, sort_keys=True).encode()).hexdigest()
     block = blockchain.create_block(proof, previous_hash)
 
-    return {"message": "Record added and block mined", "block": block}, 200
+    return jsonify({"message": "Record added and block mined", "block": block}), 200
 
 
 @app.route('/chain', methods=['GET'])
