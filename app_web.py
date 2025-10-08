@@ -1,8 +1,7 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, jsonify
 import time
 import hashlib
 import json
-import socket
 
 app = Flask(__name__)
 
@@ -59,64 +58,23 @@ class Blockchain:
         return guess_hash[:4] == "0000"
 
 
-# Initialize Blockchain
+# Initialize blockchain
 blockchain = Blockchain()
-
-# -------------------------
-# HTML Template
-# -------------------------
-template = '''
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Healthcare Blockchain</title>
-    <style>
-        body { font-family: Arial; margin: 40px; background: #f4f4f4; }
-        h1, h2 { color: #333; }
-        form { background: white; padding: 20px; max-width: 400px; margin-bottom: 30px; border-radius: 8px; }
-        input, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-        button { background: #4CAF50; color: white; border: none; }
-        .block { background: white; padding: 15px; margin-bottom: 15px; border-left: 5px solid #4CAF50;
-                 box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 800px; }
-        pre { white-space: pre-wrap; word-wrap: break-word; }
-    </style>
-</head>
-<body>
-    <h1>Healthcare Record Blockchain</h1>
-
-    <form action="/add_record" method="post">
-        <input type="text" name="patient_id" placeholder="Patient ID" required>
-        <input type="text" name="name" placeholder="Patient Name" required>
-        <input type="number" name="age" placeholder="Age" required>
-        <input type="text" name="disease" placeholder="Disease" required>
-        <input type="text" name="treatment" placeholder="Treatment" required>
-        <button type="submit">Add Patient Record</button>
-    </form>
-
-    <h2>Blockchain</h2>
-    {% for block in chain %}
-        <div class="block">
-            <pre>{{ block | tojson(indent=2) }}</pre>
-        </div>
-    {% endfor %}
-</body>
-</html>
-'''
 
 # -------------------------
 # Flask Routes
 # -------------------------
-@app.route('/')
-def index():
-    return render_template_string(template, chain=blockchain.chain)
-
 @app.route('/add_record', methods=['POST'])
 def add_record():
-    patient_id = request.form['patient_id']
-    name = request.form['name']
-    age = request.form['age']
-    disease = request.form['disease']
-    treatment = request.form['treatment']
+    data = request.form or request.json
+    patient_id = data.get('patient_id')
+    name = data.get('name')
+    age = data.get('age')
+    disease = data.get('disease')
+    treatment = data.get('treatment')
+
+    if not all([patient_id, name, age, disease, treatment]):
+        return jsonify({"message": "Missing data"}), 400
 
     blockchain.add_record(patient_id, name, age, disease, treatment)
 
@@ -126,18 +84,11 @@ def add_record():
     previous_hash = blockchain.hash(blockchain.last_block)
     blockchain.create_block(proof, previous_hash)
 
-    return render_template_string(template, chain=blockchain.chain)
+    return jsonify({"message": "Record added and block mined!"}), 200
 
-# -------------------------
-# Run App
-# -------------------------
+@app.route('/chain', methods=['GET'])
+def get_chain():
+    return jsonify({"chain": blockchain.chain}), 200
+
 if __name__ == '__main__':
-    # Get your local IP automatically
-    hostname = socket.gethostname()
-    local_ip = socket.gethostbyname(hostname)
-
-    print("\n🚀 Flask app is running...")
-    print(f"👉 On your computer: http://127.0.0.1:5000")
-    print(f"👉 On your phone (same Wi-Fi): http://{local_ip}:5000\n")
-
     app.run(host='0.0.0.0', port=5000, debug=True)
