@@ -12,7 +12,7 @@ class Blockchain:
     def __init__(self):
         self.chain = []
         self.current_records = []
-        self.create_block(proof=100, previous_hash='1')  # Genesis block
+        self.create_block(proof=100, previous_hash='1')
 
     def create_block(self, proof, previous_hash):
         block = {
@@ -52,44 +52,46 @@ class Blockchain:
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == "0000"
 
+
 # -------------------------
-# Initialize blockchain
+# Initialize Blockchain
 # -------------------------
 blockchain = Blockchain()
 
 # -------------------------
-# API Routes
+# Flask Routes
 # -------------------------
 @app.route('/add_record', methods=['POST'])
 def add_record():
-    data = request.get_json() or request.form
-    required_fields = ['patient_id', 'name', 'age', 'disease', 'treatment']
+    data = request.json
+    required_fields = ["patient_id", "name", "age", "disease", "treatment"]
     if not all(field in data for field in required_fields):
-        return jsonify({'message': 'Missing data'}), 400
+        return {"error": "Missing fields"}, 400
 
     blockchain.add_record(
-        data['patient_id'],
-        data['name'],
-        data['age'],
-        data['disease'],
-        data['treatment']
+        data["patient_id"],
+        data["name"],
+        data["age"],
+        data["disease"],
+        data["treatment"]
     )
 
+    # Mine a new block
     last_proof = blockchain.last_block['proof']
     proof = blockchain.proof_of_work(last_proof)
     previous_hash = hashlib.sha256(json.dumps(blockchain.last_block, sort_keys=True).encode()).hexdigest()
-    blockchain.create_block(proof, previous_hash)
+    block = blockchain.create_block(proof, previous_hash)
 
-    return jsonify({'message': 'Record added and block mined'}), 200
+    return {"message": "Record added and block mined", "block": block}, 200
 
 
 @app.route('/chain', methods=['GET'])
 def get_chain():
-    return jsonify({'chain': blockchain.chain}), 200
+    return jsonify({"chain": blockchain.chain}), 200
 
 
 # -------------------------
-# Run Flask App
+# Run Flask
 # -------------------------
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
