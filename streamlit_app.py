@@ -4,7 +4,8 @@ import requests
 # -------------------------
 # Flask API URL
 # -------------------------
-BASE_URL = "http://127.0.0.1:5000"  # Or your deployed Flask server
+# Use local URL for testing. Change to your deployed Flask URL when online.
+BASE_URL = "http://127.0.0.1:5000"  
 
 st.set_page_config(page_title="Healthcare Blockchain", layout="wide")
 st.title("🩺 Healthcare Blockchain Dashboard")
