@@ -3,9 +3,9 @@ import time
 import hashlib
 import json
 
-# -------------------------
+
 # Blockchain Class
-# -------------------------
+
 class Blockchain:
     def __init__(self):
         self.chain = []
@@ -57,14 +57,14 @@ class Blockchain:
         return guess_hash[:4] == "0000"
 
 
-# -------------------------
+
 # Instantiate Blockchain
-# -------------------------
+
 blockchain = Blockchain()
 
-# -------------------------
+
 # Streamlit Frontend
-# -------------------------
+
 def main():
     st.title("🩺 Healthcare Blockchain System")
     st.markdown("This blockchain securely stores **patient medical records** on-chain.")
