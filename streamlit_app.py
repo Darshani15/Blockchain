@@ -1,14 +1,16 @@
 import streamlit as st
 import requests
 
-# Replace with your deployed Flask URL or localhost for testing
-BASE_URL = "http://127.0.0.1:5000"
+# -------------------------
+# Flask API URL
+# -------------------------
+BASE_URL = "http://127.0.0.1:5000"  # Or your deployed Flask server
 
 st.set_page_config(page_title="Healthcare Blockchain", layout="wide")
 st.title("🩺 Healthcare Blockchain Dashboard")
 
 # -----------------------------
-# Add Record Form
+# Add New Patient Record Form
 # -----------------------------
 st.subheader("➕ Add Patient Record")
 with st.form("add_record_form"):
@@ -20,30 +22,30 @@ with st.form("add_record_form"):
     submitted = st.form_submit_button("Add Record")
 
     if submitted:
-        data = {
-            "patient_id": patient_id,
-            "name": name,
-            "age": age,
-            "disease": disease,
-            "treatment": treatment
-        }
         try:
-            res = requests.post(f"{BASE_URL}/add_record", json=data, timeout=5)
+            data = {
+                "patient_id": patient_id,
+                "name": name,
+                "age": age,
+                "disease": disease,
+                "treatment": treatment
+            }
+            res = requests.post(f"{BASE_URL}/add_record", json=data)
             if res.status_code == 200:
-                st.success("✅ Record added and new block mined!")
+                st.success("✅ Record added successfully and new block mined!")
             else:
-                st.error(f"❌ Failed. Status code: {res.status_code}")
+                st.error(f"❌ Failed to add record. Status code: {res.status_code}")
         except requests.exceptions.RequestException:
-            st.warning("⚠️ Could not connect to Flask server.")
+            st.warning("⚠️ Could not connect to Flask server. Make sure it's running.")
 
 # -----------------------------
-# Display Blockchain
+# Display Blockchain Explorer
 # -----------------------------
 st.subheader("📜 Blockchain Explorer")
 try:
-    res = requests.get(f"{BASE_URL}/chain", timeout=5)
-    if res.status_code == 200:
-        chain = res.json()['chain']
+    response = requests.get(f"{BASE_URL}/chain")
+    if response.status_code == 200:
+        chain = response.json()['chain']
         for block in chain:
             st.markdown(f"### Block {block['index']}")
             st.markdown(f"**Timestamp:** {block['timestamp']}")
@@ -54,6 +56,6 @@ try:
                 st.json(record)
             st.markdown("---")
     else:
-        st.error(f"❌ Failed to fetch blockchain. Status: {res.status_code}")
+        st.error(f"❌ Could not load blockchain data. Status code: {response.status_code}")
 except requests.exceptions.RequestException:
-    st.warning("⚠️ Flask server not reachable.")
+    st.warning("⚠️ Flask server not reachable. Blockchain Explorer offline.")
